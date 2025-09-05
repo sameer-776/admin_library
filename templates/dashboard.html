@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Library Admin Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="../static/css/style.css" />
+</head>
+
+<body class="bg-gray-100 min-h-screen p-4">
+
+  <!-- Page Title -->
+  <header class="mb-6 relative">
+    <!-- Centered Heading -->
+    <h1 class="text-center text-3xl font-extrabold text-gray-800">
+      Poornima University Central Library <br /> Admin Dashboard
+    </h1>
+
+    <!-- Logo positioned top right -->
+    <div class="absolute top-[-10px] right-0 mt-2 mr-8">
+      <img src="PULogo.png" alt="PU Logo" class="w-150 h-auto" />
+    </div>
+  </header>
+
+  <div class="flex justify-between items-center mb-6">
+    <input type="date" id="datePicker" class="border rounded-lg px-3 py-2" />
+    <div class="flex gap-2">
+      <button id="refreshBtn" class="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-1">
+        ⟳ Refresh
+      </button>
+      <button id="exportBtn" class="bg-green-500 text-white px-4 py-2 rounded-lg">
+        ⬇ Export
+      </button>
+
+    </div>
+  </div>
+  <!-- Export Options Modal -->
+  <div id="exportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg p-6 w-80 max-w-full">
+      <h2 class="text-lg font-semibold mb-4">Choose Export Format</h2>
+      <div class="flex flex-col gap-3">
+        <button id="exportPdfBtn" class="bg-blue-600 text-white py-2 rounded">Download PDF</button>
+        <button id="exportExcelBtn" class="bg-green-600 text-white py-2 rounded">Download Excel</button>
+        <button id="exportCancelBtn" class="mt-4 text-gray-600 hover:text-gray-900">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Excel Date Range Modal -->
+  <div id="excelDateModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg p-6 w-80 max-w-full">
+      <h2 class="text-lg font-semibold mb-4">Select Date Range</h2>
+      <form id="excelDateForm" class="flex flex-col gap-4">
+        <label>
+          <input type="radio" name="dateOption" value="today" checked />
+          Today
+        </label>
+        <label>
+          <input type="radio" name="dateOption" value="custom" />
+          Custom Range
+        </label>
+        <div id="customDateInputs" class="hidden flex flex-col gap-2">
+          <input type="date" id="startDate" name="startDate" class="border rounded px-2 py-1" />
+          <input type="date" id="endDate" name="endDate" class="border rounded px-2 py-1" />
+        </div>
+        <div class="flex justify-end gap-3">
+          <button type="button" id="excelDateCancelBtn" class="text-gray-600 hover:text-gray-900">Cancel</button>
+          <button type="submit" class="bg-green-600 text-white px-3 py-1 rounded">Export</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="bg-white shadow rounded-2xl p-6 text-center">
+      <h2 id="statStudentsToday" class="text-2xl font-bold text-blue-600">126</h2>
+      <p class="text-gray-600">Students Today</p>
+    </div>
+    <div class="bg-white shadow rounded-2xl p-6 text-center">
+      <h2 id="statCurrentlyInside" class="text-2xl font-bold text-green-600">48</h2>
+      <p class="text-gray-600">Currently Inside</p>
+    </div>
+    <div class="bg-white shadow rounded-2xl p-6 text-center">
+      <h2 id="statAvgStay" class="text-2xl font-bold text-purple-600">42m</h2>
+      <p class="text-gray-600">Avg Stay Duration</p>
+    </div>
+  </div>
+
+  <!-- Weekly Footfall -->
+  <div class="bg-white shadow rounded-2xl p-6 mb-6">
+    <h3 class="text-lg font-semibold mb-4">Weekly Footfall</h3>
+    <canvas id="weeklyFootfall" class="max-h-[200px]"></canvas>
+  </div>
+
+  <!-- Hourly + Branch Usage -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    <div class="bg-white shadow rounded-2xl p-6">
+      <h3 class="text-lg font-semibold mb-4">Hourly Distribution</h3>
+      <canvas id="hourlyDistribution" class="max-h-[200px]"></canvas>
+    </div>
+    <div class="bg-white shadow rounded-2xl p-6">
+      <h3 class="text-lg font-semibold mb-4">Branch/Year Usage</h3>
+      <canvas id="branchUsage" class="max-h-[200px]"></canvas>
+    </div>
+  </div>
+
+  <!-- Avg Stay + Top Visitors + Monthly Trend -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="bg-white shadow rounded-2xl p-6">
+      <h3 class="text-lg font-semibold mb-4">Average Stay Duration</h3>
+      <canvas id="avgStay" class="max-h-[200px]"></canvas>
+    </div>
+    <div class="bg-white shadow rounded-2xl p-6">
+      <h3 class="text-lg font-semibold mb-4">Top Visitors Of The Week</h3>
+      <canvas id="topVisitors" class="max-h-[200px]"></canvas>
+    </div>
+    <div class="bg-white shadow rounded-2xl p-6">
+      <h3 class="text-lg font-semibold mb-4">Monthly Trend</h3>
+      <canvas id="monthlyTrend" class="max-h-[200px]"></canvas>
+    </div>
+  </div>
+
+  <script src="../static/js/dashboard.js"></script>
+  <!-- Developer Credits with Supervisor -->
+  <footer class="mt-12 py-4 bg-gray-100 text-center text-gray-600 text-sm space-y-1">
+    <div>Developed by Sameer (AIML 2nd Year) &nbsp;|&nbsp; Kshitij (BCA 2nd Year) &nbsp;|&nbsp; Aryan (AIML 2nd Year)
+      &nbsp;|&nbsp; Mohit (BCA 2nd Year)</div>
+    <div class="italic">Under the supervision of Dr. Vipin Khattri</div>
+  </footer>
+
+</body>
+
+</html>
