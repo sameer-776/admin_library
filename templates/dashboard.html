@@ -7,6 +7,7 @@
   <title>Library Admin Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
   <link rel="stylesheet" href="../static/css/style.css" />
 </head>
 
@@ -14,12 +15,9 @@
 
   <!-- Page Title -->
   <header class="mb-6 relative">
-    <!-- Centered Heading -->
     <h1 class="text-center text-3xl font-extrabold text-gray-800">
       Poornima University Central Library <br /> Admin Dashboard
     </h1>
-
-    <!-- Logo positioned top right -->
     <div class="absolute top-[-10px] right-0 mt-2 mr-8">
       <img src="PULogo.png" alt="PU Logo" class="w-150 h-auto" />
     </div>
@@ -28,15 +26,12 @@
   <div class="flex justify-between items-center mb-6">
     <input type="date" id="datePicker" class="border rounded-lg px-3 py-2" />
     <div class="flex gap-2">
-      <button id="refreshBtn" class="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-1">
-        ⟳ Refresh
-      </button>
-      <button id="exportBtn" class="bg-green-500 text-white px-4 py-2 rounded-lg">
-        ⬇ Export
-      </button>
-
+      <button id="refreshBtn"
+        class="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-1">⟳ Refresh</button>
+      <button id="exportBtn" class="bg-green-500 text-white px-4 py-2 rounded-lg">⬇ Export</button>
     </div>
   </div>
+
   <!-- Export Options Modal -->
   <div id="exportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
     <div class="bg-white rounded-lg p-6 w-80 max-w-full">
@@ -55,12 +50,10 @@
       <h2 class="text-lg font-semibold mb-4">Select Date Range</h2>
       <form id="excelDateForm" class="flex flex-col gap-4">
         <label>
-          <input type="radio" name="dateOption" value="today" checked />
-          Today
+          <input type="radio" name="dateOption" value="today" checked /> Today
         </label>
         <label>
-          <input type="radio" name="dateOption" value="custom" />
-          Custom Range
+          <input type="radio" name="dateOption" value="custom" /> Custom Range
         </label>
         <div id="customDateInputs" class="hidden flex flex-col gap-2">
           <input type="date" id="startDate" name="startDate" class="border rounded px-2 py-1" />
@@ -74,67 +67,95 @@
     </div>
   </div>
 
-  <!-- Stat Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-    <div class="bg-white shadow rounded-2xl p-6 text-center">
-      <h2 id="statStudentsToday" class="text-2xl font-bold text-blue-600">126</h2>
-      <p class="text-gray-600">Students Today</p>
+  <!-- Dashboard Content Wrapper -->
+  <div id="dashboardContent">
+
+    <!-- Stat Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="bg-white shadow rounded-2xl p-6 text-center">
+        <h2 id="statStudentsToday" class="text-2xl font-bold text-blue-600">126</h2>
+        <p class="text-gray-600">Students Today</p>
+      </div>
+      <div class="bg-white shadow rounded-2xl p-6 text-center">
+        <h2 id="statCurrentlyInside" class="text-2xl font-bold text-green-600">48</h2>
+        <p class="text-gray-600">Currently Inside</p>
+      </div>
+      <div class="bg-white shadow rounded-2xl p-6 text-center">
+        <h2 id="statAvgStay" class="text-2xl font-bold text-purple-600">42m</h2>
+        <p class="text-gray-600">Avg Stay Duration</p>
+      </div>
     </div>
-    <div class="bg-white shadow rounded-2xl p-6 text-center">
-      <h2 id="statCurrentlyInside" class="text-2xl font-bold text-green-600">48</h2>
-      <p class="text-gray-600">Currently Inside</p>
+
+    <!-- Hourly + Weekly + Branch -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div class="bg-white shadow rounded-2xl p-6">
+        <h3 class="text-lg font-semibold mb-4">Hourly Distribution</h3>
+        <canvas id="hourlyDistribution" class="max-h-[200px]"></canvas>
+      </div>
+      <div class="bg-white shadow rounded-2xl p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-4">Weekly Footfall</h3>
+        <canvas id="weeklyFootfall" class="max-h-[200px]"></canvas>
+      </div>
+      <div class="bg-white shadow rounded-2xl p-6">
+        <h3 class="text-lg font-semibold mb-4">Branch/Year Usage</h3>
+        <canvas id="branchUsage" class="max-h-[200px]"></canvas>
+      </div>
     </div>
-    <div class="bg-white shadow rounded-2xl p-6 text-center">
-      <h2 id="statAvgStay" class="text-2xl font-bold text-purple-600">42m</h2>
-      <p class="text-gray-600">Avg Stay Duration</p>
+
+    <!-- Avg Stay + Top Visitors + Monthly Trend -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-white shadow rounded-2xl p-6">
+        <h3 class="text-lg font-semibold mb-4">Average Stay Duration</h3>
+        <canvas id="avgStay" class="max-h-[200px]"></canvas>
+      </div>
+      <div class="bg-white shadow rounded-2xl p-6">
+        <h3 class="text-lg font-semibold mb-4">Top Visitors Of The Week</h3>
+        <canvas id="topVisitors" class="max-h-[200px]"></canvas>
+      </div>
+      <div class="bg-white shadow rounded-2xl p-6">
+        <h3 class="text-lg font-semibold mb-4">Monthly Trend</h3>
+        <canvas id="monthlyTrend" class="max-h-[200px]"></canvas>
+      </div>
     </div>
   </div>
 
-  <!-- Hourly Usage -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-    <div class="bg-white shadow rounded-2xl p-6">
-      <h3 class="text-lg font-semibold mb-4">Hourly Distribution</h3>
-      <canvas id="hourlyDistribution" class="max-h-[200px]"></canvas>
-    </div>
-
-    <!-- Weekly Footfall -->
-    <div class="bg-white shadow rounded-2xl p-6 mb-6">
-      <h3 class="text-lg font-semibold mb-4">Weekly Footfall</h3>
-      <canvas id="weeklyFootfall" class="max-h-[200px]"></canvas>
-    </div>
-
-<!-- Branch wise -->
-
-    <div class="bg-white shadow rounded-2xl p-6">
-      <h3 class="text-lg font-semibold mb-4">Branch/Year Usage</h3>
-      <canvas id="branchUsage" class="max-h-[200px]"></canvas>
-    </div>
-  </div>
-
-  <!-- Avg Stay + Top Visitors + Monthly Trend -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <div class="bg-white shadow rounded-2xl p-6">
-      <h3 class="text-lg font-semibold mb-4">Average Stay Duration</h3>
-      <canvas id="avgStay" class="max-h-[200px]"></canvas>
-    </div>
-    <div class="bg-white shadow rounded-2xl p-6">
-      <h3 class="text-lg font-semibold mb-4">Top Visitors Of The Week</h3>
-      <canvas id="topVisitors" class="max-h-[200px]"></canvas>
-    </div>
-    <div class="bg-white shadow rounded-2xl p-6">
-      <h3 class="text-lg font-semibold mb-4">Monthly Trend</h3>
-      <canvas id="monthlyTrend" class="max-h-[200px]"></canvas>
-    </div>
-  </div>
-
-  <script src="../static/js/dashboard.js"></script>
-  <!-- Developer Credits with Supervisor -->
   <footer class="mt-12 py-4 bg-gray-100 text-center text-gray-600 text-sm space-y-1">
-    <div>Developed by Sameer (AIML 2nd Year) &nbsp;|&nbsp; Kshitij (BCA 2nd Year) &nbsp;|&nbsp; Aryan (AIML 2nd Year)
-      &nbsp;|&nbsp; Mohit (BCA 2nd Year)</div>
+    <div>Developed by Sameer (AIML 2nd Year) | Kshitij (BCA 2nd Year) | Aryan (AIML 2nd Year) | Mohit (BCA 2nd Year)</div>
     <div class="italic">Under the supervision of Dr. Vipin Khattri</div>
   </footer>
 
-</body>
+  <!-- Scripts -->
+  <script>
+    // Open export modal
+    document.getElementById("exportBtn").addEventListener("click", () => {
+      document.getElementById("exportModal").classList.remove("hidden");
+    });
 
+    // Cancel export modal
+    document.getElementById("exportCancelBtn").addEventListener("click", () => {
+      document.getElementById("exportModal").classList.add("hidden");
+    });
+
+    // Download PDF
+    document.getElementById("exportPdfBtn").addEventListener("click", () => {
+      const dashboard = document.getElementById("dashboardContent");
+      const opt = {
+        margin: 0.3,
+        filename: "Library_Dashboard.pdf",
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: "in", format: "a4", orientation: "portrait" }
+      };
+      html2pdf().set(opt).from(dashboard).save();
+      document.getElementById("exportModal").classList.add("hidden");
+    });
+
+    // TODO: Hook Excel export later
+    document.getElementById("exportExcelBtn").addEventListener("click", () => {
+      alert("Excel export not implemented yet.");
+    });
+  </script>
+  <script src="../static/js/dashboard.js"></script>
+
+</body>
 </html>

@@ -125,13 +125,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // --- Existing Refresh Button Handler ---
-
   document.getElementById('refreshBtn').addEventListener('click', () => {
     alert('Refresh clicked. Data fetching to be implemented.');
   });
 
   // --- Export Modal Flow Code ---
-
   const exportBtn = document.getElementById('exportBtn');
   const exportModal = document.getElementById('exportModal');
   const exportPdfBtn = document.getElementById('exportPdfBtn');
@@ -206,15 +204,38 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // --- PDF Export Implementation ---
   function exportPageAsPDF() {
-    alert('PDF export functionality to be implemented.');
-    // Example:
-    // html2pdf().from(document.body).save('dashboard.pdf');
+    const element = document.getElementById("dashboard"); // Wrap entire dashboard in this div
+
+    const opt = {
+      margin:       0.3,
+      filename:     `dashboard-report-${new Date().toISOString().slice(0,10)}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
+    };
+
+    html2pdf().set(opt).from(element).toPdf().get('pdf').then((pdf) => {
+      const totalPages = pdf.internal.getNumberOfPages();
+      const footerText = `Report generated on ${new Date().toLocaleString()}`;
+
+      for (let i = 1; i <= totalPages; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(10);
+        pdf.text(
+          footerText,
+          pdf.internal.pageSize.getWidth() / 2,
+          pdf.internal.pageSize.getHeight() - 0.2,
+          { align: 'center' }
+        );
+      }
+    }).save();
   }
 
+  // --- Excel Export Placeholder ---
   function exportExcelForDateRange(start, end) {
     alert(`Export Excel from ${start} to ${end} - functionality to be implemented.`);
-    // Example:
-    // Call backend API or use SheetJS for frontend export
+    // TODO: Implement Excel export using backend API or SheetJS
   }
 });
